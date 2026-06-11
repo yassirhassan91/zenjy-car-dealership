@@ -1,0 +1,555 @@
+{
+  "vehicles": [
+    {
+      "id": "car-1",
+      "make": "Toyota",
+      "model": "Hilux Double Cabin",
+      "year": 2023,
+      "price": 109200000,
+      "mileage": 18000,
+      "fuelType": "Diesel",
+      "transmission": "Manual",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1622146914594-eaf59b09be0d?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "2.8L GD-6 Turbo Diesel",
+        "horsepower": 201,
+        "fuelEconomy": "12.5 km/L",
+        "exteriorColor": "Attitude Black Metallic",
+        "interiorColor": "Black Premium Fabric",
+        "drivetrain": "4WD with Rear Differential Lock",
+        "acceleration": "10.1s (0-100 km/h)"
+      },
+      "description": "The absolute king of Tanzanian roads. Delivering unmatched cargo versatility, high torque outputs, and military-grade suspension systems built to handle rough terrain on standard safaris and urban commutes alike.",
+      "features": [
+        "Rugged 4WD Selector",
+        "Heavy Duty Cargo Liner",
+        "Dual Zone Climate Control",
+        "Reinforced Dual-Wishbone Suspension",
+        "9-inch Touchscreen Infotainment",
+        "Reverse Assist Camera Setup"
+      ],
+      "ratingsSum": 24,
+      "ratingsCount": 5
+    },
+    {
+      "id": "car-toyota-prado-kzj78",
+      "make": "Toyota",
+      "model": "Land Cruiser Prado LC78 EX",
+      "year": 1994,
+      "price": 38500000,
+      "mileage": 136383,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "3.0L Turbo Diesel 1KZ-TE",
+        "horsepower": 130,
+        "fuelEconomy": "9.5 km/L",
+        "exteriorColor": "Gloss Black Metallic",
+        "interiorColor": "Gray Premium Suede",
+        "drivetrain": "4WD (All-Wheel Drive)",
+        "acceleration": "12.8s (0-100 km/h)"
+      },
+      "description": "Authentic retro legend KZJ78 Prado EX 4WD import. Renowned Japanese-engineered bulletproof execution, massive 8-seat cabin space, high ground-clearance stance, and Yokohama port certifications.",
+      "features": [
+        "Original 1KZ-TE turbodiesel engine",
+        "Rare retro EX Trim Package",
+        "Robust low-range 4WD transfer case",
+        "Spacious 8-seat configuration",
+        "Dual Zone Air Conditioning",
+        "Pristine Yokohama Export Records"
+      ],
+      "ratingsSum": 25,
+      "ratingsCount": 5
+    },
+    {
+      "id": "car-2",
+      "make": "Toyota",
+      "model": "Land Cruiser 300 ZX",
+      "year": 2024,
+      "price": 299013000,
+      "mileage": 1200,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "New",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1594979185157-c1d7945c43d4?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "3.3L Twin-Turbo V6 Diesel",
+        "horsepower": 304,
+        "fuelEconomy": "11.2 km/L",
+        "exteriorColor": "Precious White Pearl",
+        "interiorColor": "Beige Premium Nappa Leather",
+        "drivetrain": "Full-Time 4WD with Multi-Terrain Select",
+        "acceleration": "6.9s (0-100 km/h)"
+      },
+      "description": "The peak of off-road performance and prestige in East Africa. Combining a robust Twin-Turbo powertrain with standard luxury leather styling and active height damping control.",
+      "features": [
+        "Multi-Terrain Monitor with Cameras",
+        "Active Height Control Damping",
+        "JBL 14-Speaker Premium Audio",
+        "Fingerprint Starter Safeties",
+        "Spacious Dual Row Ottoman Lounge",
+        "Bi-LED Adaptive Beam headlights"
+      ],
+      "ratingsSum": 19,
+      "ratingsCount": 4
+    },
+    {
+      "id": "car-3",
+      "make": "Nissan",
+      "model": "Patrol Y62 Royale",
+      "year": 2023,
+      "price": 221005000,
+      "mileage": 4500,
+      "fuelType": "Gasoline",
+      "transmission": "Automatic",
+      "condition": "New",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1622146914594-eaf59b09be0d?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "5.6L V8 Petrol Mode",
+        "horsepower": 400,
+        "fuelEconomy": "8.5 km/L",
+        "exteriorColor": "Metallic Star Silver",
+        "interiorColor": "Tan Premium Full Grain Leather",
+        "drivetrain": "All-Mode 4WD System",
+        "acceleration": "6.6s (0-100 km/h)"
+      },
+      "description": "An absolute luxury cruiser, offering high ground clearance, an intelligent state hydraulic body suspension system, and VIP seating for outstanding highway confidence.",
+      "features": [
+        "Hydraulic Body Motion Control (HBMC)",
+        "Premium Wooden Trim Paneling",
+        "Rear Passenger Seat Displays",
+        "Coolbox Center Console Compartment",
+        "Intelligent Cruise Control",
+        "Astounding Panoramic Skylight"
+      ],
+      "ratingsSum": 10,
+      "ratingsCount": 2
+    },
+    {
+      "id": "car-4",
+      "make": "Suzuki",
+      "model": "Jimny 5-Door GLX",
+      "year": 2024,
+      "price": 67600000,
+      "mileage": 50,
+      "fuelType": "Gasoline",
+      "transmission": "Manual",
+      "condition": "New",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "1.5L VVT K15B Engine",
+        "horsepower": 102,
+        "fuelEconomy": "14.8 km/L",
+        "exteriorColor": "Kinetic Yellow & Black Roof",
+        "interiorColor": "Charcoal Black Sport Fabric",
+        "drivetrain": "ALLGRIP PRO 4WD (Low-range Gear)",
+        "acceleration": "12.5s (0-100 km/h)"
+      },
+      "description": "Combining retro heritage with 5-door passenger usability. Light footprint, robust off-road capability, and high fuel economy, perfect for urban maneuvers and rough trail treks alike.",
+      "features": [
+        "AllGrip Pro mechanical 4x4 Selector",
+        "Rigid Axle 3-link suspension setup",
+        "Rugged Scratch Resistant Wheelarches",
+        "9-inch Touch Link Navigation",
+        "Compact spare wheel on tailgate",
+        "High Ground-Clearance bumpers"
+      ],
+      "ratingsSum": 15,
+      "ratingsCount": 3
+    },
+    {
+      "id": "car-5",
+      "make": "Mazda",
+      "model": "CX-5 SkyActiv-D",
+      "year": 2022,
+      "price": 53300000,
+      "mileage": 38000,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "2.2L Twin-Turbo Diesel",
+        "horsepower": 187,
+        "fuelEconomy": "15.4 km/L",
+        "exteriorColor": "Soul Red Crystal Metallic",
+        "interiorColor": "Black Premium Perforated Leather",
+        "drivetrain": "i-ACTIV Intel AWD",
+        "acceleration": "8.2s (0-100 km/h)"
+      },
+      "description": "Highly popular across Tanzania. Delivering premium cabin ergonomics, smart city brake assists, and incredible turbo-diesel efficiency in an athletic posture.",
+      "features": [
+        "G-Vectoring Control System Plus",
+        "Bose 10-speaker Audio Staging",
+        "Heated Leather Steering Wheel",
+        "Power liftgate with smart sensors",
+        "Active Driving HUD projection",
+        "Smart City Brake Support Option"
+      ],
+      "ratingsSum": 5,
+      "ratingsCount": 1
+    },
+    {
+      "id": "car-6",
+      "make": "Honda",
+      "model": "Fit Hybrid",
+      "year": 2021,
+      "price": 25480000,
+      "mileage": 45000,
+      "fuelType": "Hybrid",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "1.5L i-VTEC Hybrid e:HEV System",
+        "horsepower": 109,
+        "fuelEconomy": "28.6 km/L",
+        "exteriorColor": "Platinum White Pearl",
+        "interiorColor": "Charcoal Soft Knit Magic Fabric",
+        "drivetrain": "Front-Wheel Drive",
+        "acceleration": "9.4s (0-100 km/h)"
+      },
+      "description": "The ultimate solution for daily city mobility in East Africa. Astonishing fuel efficiency combined with Honda's flexible magic seat cargo configurations.",
+      "features": [
+        "Honda Magic Seat flexibility controls",
+        "Smart Dual-Climate Eco Controls",
+        "Adaptive Cruise Control Safety",
+        "Dynamic Eco Mode Selector Panel",
+        "Push Start ignition system",
+        "Multi-Angle broad Assist Cam"
+      ],
+      "ratingsSum": 20,
+      "ratingsCount": 4
+    },
+    {
+      "id": "car-7",
+      "make": "Mitsubishi",
+      "model": "Pajero GLS Sport",
+      "year": 2020,
+      "price": 80605000,
+      "mileage": 55000,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1594979185157-c1d7945c43d4?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "3.2L DI-D common rail turbo diesel",
+        "horsepower": 190,
+        "fuelEconomy": "10.1 km/L",
+        "exteriorColor": "Eiger Metallic Gray",
+        "interiorColor": "Charcoal Black Premium Leather",
+        "drivetrain": "Super Select 4WD-II Mode",
+        "acceleration": "10.8s (0-100 km/h)"
+      },
+      "description": "Rally-proven durability for East African road treks. Delivering robust multi-link offroad suspension system, electronic diff lock, and standard executive layouts.",
+      "features": [
+        "Super Select 4WD mechanics",
+        "Electronic cabin differential locker",
+        "Premium Rockford audio bundle",
+        "Panoramic Sliding Sunroof System",
+        "Underbelly heavy skid plates",
+        "High Ground-Clearance Side Rails"
+      ],
+      "ratingsSum": 0,
+      "ratingsCount": 0
+    },
+    {
+      "id": "car-8",
+      "make": "Subaru",
+      "model": "Forester XT",
+      "year": 2021,
+      "price": 48230000,
+      "mileage": 42000,
+      "fuelType": "Gasoline",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "2.0L Direct Injection Turbo Boxer",
+        "horsepower": 241,
+        "fuelEconomy": "12.2 km/L",
+        "exteriorColor": "Dark Quartz Blue Pearl",
+        "interiorColor": "Sporty Dark Fabric Comfort Knit",
+        "drivetrain": "Symmetrical Active AWD System",
+        "acceleration": "7.5s (0-100 km/h)"
+      },
+      "description": "Renowned for its handling precision on coastal beaches and forest dirt paths. Symmetrical design means balanced distribution of safety, handling, and load capacities.",
+      "features": [
+        "Symmetrical AWD with X-Mode",
+        "Subaru EyeSight Driver Assist Cam",
+        "Dynamic Power Tailgate Switch",
+        "Premium Harman Sound Setup",
+        "Dual-zone adaptive AC system",
+        "Carbon Accent console decoration"
+      ],
+      "ratingsSum": 0,
+      "ratingsCount": 0
+    },
+    {
+      "id": "car-9",
+      "make": "Isuzu",
+      "model": "D-Max V-Cross",
+      "year": 2023,
+      "price": 102700000,
+      "mileage": 15000,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1511919884226-fd3cad34687c?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "3.0L BluePower Turbo Diesel",
+        "horsepower": 190,
+        "fuelEconomy": "12.8 km/L",
+        "exteriorColor": "Valencia Volcano Orange",
+        "interiorColor": "V-Cross Sport Anthracite Leather",
+        "drivetrain": "Terrain Command 4WD with Rear Locker",
+        "acceleration": "9.8s (0-100 km/h)"
+      },
+      "description": "Combining heavy duty commercial payload build configuration with outstanding interior safety features. Popular for mining, farming, and luxury double-cab utility in Dar es Salaam.",
+      "features": [
+        "Terrain Command 4x4 Dial switch",
+        "800mm High Wading Depth rating",
+        "Under-chassis Steel Skid Protectors",
+        "HD Dual analog dials with LCD display",
+        "High strength steel loading bay",
+        "Autonomous emergency auto breaking"
+      ],
+      "ratingsSum": 0,
+      "ratingsCount": 0
+    },
+    {
+      "id": "car-10",
+      "make": "Tata Motors",
+      "model": "Tiago NRG Cross",
+      "year": 2023,
+      "price": 30950000,
+      "mileage": 5000,
+      "fuelType": "Gasoline",
+      "transmission": "Manual",
+      "condition": "New",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1542282088-fe8426682b8f?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "1.2L Revotron Unleaded",
+        "horsepower": 86,
+        "fuelEconomy": "18.2 km/L",
+        "exteriorColor": "Canyon Flame Orange",
+        "interiorColor": "Charcoal Black Contrast Cloth",
+        "drivetrain": "Front-Wheel Drive",
+        "acceleration": "13.2s (0-100 km/h)"
+      },
+      "description": "An excellent compact hatchback optimized for rough tarmac and speedbumps, offering elevated high ground-clearance stance and fuel efficiency.",
+      "features": [
+        "181mm Heavy Duty High Ground-Clearance",
+        "Rugged Armor cladding protection panels",
+        "7-inch entertainment touchscreen display",
+        "Dual front SRS protection air cushions",
+        "Harman acoustic tuned sound system",
+        "Durable roof utility transport rails"
+      ],
+      "ratingsSum": 0,
+      "ratingsCount": 0
+    },
+    {
+      "id": "car-11",
+      "make": "BMW",
+      "model": "X5 xDrive40d",
+      "year": 2023,
+      "price": 181740000,
+      "mileage": 11000,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "3.0L TwinPower Turbo Inline 6 Diesel",
+        "horsepower": 340,
+        "fuelEconomy": "14.1 km/L",
+        "exteriorColor": "Carbon Black Sapphire Metallic",
+        "interiorColor": "Vernasca perforated luxury leather",
+        "drivetrain": "xDrive All-Wheel Drive",
+        "acceleration": "5.5s (0-100 km/h)"
+      },
+      "description": "Comfortable executive highway cruiser. Providing robust fuel efficiency, advanced luxury amenities, and standard dynamic safety systems.",
+      "features": [
+        "Adaptive dual-axle speed suspension",
+        "Panoramic skylight with ambient LEDs",
+        "Harman Kardon Professional surround sound",
+        "BMW Live Cockpit Professional UI",
+        "Comfort entry automated key sensors",
+        "Laser dynamic high-penetration lights"
+      ],
+      "ratingsSum": 0,
+      "ratingsCount": 0
+    },
+    {
+      "id": "car-12",
+      "make": "Toyota",
+      "model": "Fortuner Sigma 4",
+      "year": 2022,
+      "price": 103740000,
+      "mileage": 28000,
+      "fuelType": "Diesel",
+      "transmission": "Automatic",
+      "condition": "Used",
+      "availability": "Available",
+      "imageUrls": [
+        "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&q=80&w=800",
+        "https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=800"
+      ],
+      "specs": {
+        "engine": "2.8L GD-6 High Torque Diesel",
+        "horsepower": 201,
+        "fuelEconomy": "12.1 km/L",
+        "exteriorColor": "Attitude Solid Black",
+        "interiorColor": "Dark Roasted Coffee Leather",
+        "drivetrain": "Part-Time 4WD with low-range transfer",
+        "acceleration": "9.7s (0-100 km/h)"
+      },
+      "description": "Combining Hilux mechanical durability with standard 7-seat family utility. Popular in Dar with high-efficiency diesel torque and high ground clearance.",
+      "features": [
+        "Sigma-4 active shift dial mechanism",
+        "Intelligent active traction controller",
+        "Bi-LED high clarity lamps",
+        "Powered automated backdoor cargo gate",
+        "High-durability stainless sidesteps",
+        "Ventilated multi-way power front seats"
+      ],
+      "ratingsSum": 0,
+      "ratingsCount": 0
+    }
+  ],
+  "reviews": [
+    {
+      "id": "rev-1",
+      "vehicleId": "car-1",
+      "userName": "Alexander Wright",
+      "rating": 5,
+      "comment": "Unmatched durability! Loaded my Hilux with safari gear and traversed through Serengeti mud track flawlessly. Zenjy group made importing to Tanzania ultra easy.",
+      "date": "2026-05-18"
+    },
+    {
+      "id": "rev-2",
+      "vehicleId": "car-1",
+      "userName": "Sofia Martinez",
+      "rating": 5,
+      "comment": "Extremely robust suspension on Dar es Salaam roads, handles speedbumps effortlessly and cargo space is outstanding. Fast shipping support!",
+      "date": "2026-06-01"
+    },
+    {
+      "id": "rev-3",
+      "vehicleId": "car-2",
+      "userName": "Marcus Sterling",
+      "rating": 4,
+      "comment": "The Land Cruiser 300 V6 diesel twin-turbo is a beast of a machine. Prestigious stance, quiet cabin, but takes up big space in tight city center parking lanes.",
+      "date": "2026-05-24"
+    }
+  ],
+  "users": [
+    {
+      "id": "user-admin",
+      "name": "Zenjy Administrator",
+      "email": "admin@zenjy.com",
+      "role": "admin",
+      "savedVehicles": [
+        "car-3"
+      ]
+    },
+    {
+      "id": "user-guest",
+      "name": "Valued Customer",
+      "email": "monnrayyasin@gmail.com",
+      "role": "user",
+      "savedVehicles": [
+        "car-1",
+        "car-2"
+      ]
+    }
+  ],
+  "orders": [],
+  "inquiries": [
+    {
+      "id": "inq-1",
+      "customerName": "Aisha Jordan",
+      "email": "aisha@example.com",
+      "phone": "+1 (555) 321-9876",
+      "vehicleId": "car-1",
+      "vehicleName": "Toyota Hilux Double Cabin",
+      "message": "Hello, is this car available for instant custom finance plans? I would love to talk to an expert or have a quick inspection booking scheduled.",
+      "date": "2026-06-05T10:00:00Z",
+      "status": "New"
+    },
+    {
+      "id": "inq-2",
+      "customerName": "Kenji Sato",
+      "email": "kenji@example.com",
+      "phone": "+81 90 1234 5678",
+      "message": "Could you import specific Japanese models with custom certifications? Please let me know your services regarding high-end sports imports.",
+      "date": "2026-06-07T14:30:00Z",
+      "status": "Read"
+    }
+  ],
+  "testDrives": [
+    {
+      "id": "td-1",
+      "customerName": "Marcus Sterling",
+      "email": "marcus@example.com",
+      "phone": "+1 (555) 765-4321",
+      "vehicleId": "car-2",
+      "vehicleName": "Toyota Land Cruiser 300 ZX",
+      "dateTime": "2026-06-15T11:00:00.000Z",
+      "status": "Confirmed",
+      "date": "2026-06-08"
+    }
+  ]
+}

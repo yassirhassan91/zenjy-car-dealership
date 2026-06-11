@@ -1,0 +1,6 @@
+{
+  "name": "Zenjy Motors Dealership",
+  "description": "A premium, modern automotive e-commerce platform allowing customers to search, compare, customize, finance, and purchase vehicles online.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
