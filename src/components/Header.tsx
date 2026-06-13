@@ -21,6 +21,8 @@ export default function Header({
   setSelectedVehicleId
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const [logoClicks, setLogoClicks] = React.useState(0);
+  const clickTimeoutRef = React.useRef<any>(null);
 
   const navItems = [
     { id: 'home', label: 'Home' },
@@ -33,17 +35,40 @@ export default function Header({
     setMobileMenuOpen(false);
   };
 
+  const handleLogoSvgClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const nextCount = logoClicks + 1;
+    setLogoClicks(nextCount);
+
+    if (clickTimeoutRef.current) {
+      clearTimeout(clickTimeoutRef.current);
+    }
+
+    if (nextCount >= 6) {
+      setLogoClicks(0);
+      handleTabClick('admin');
+    } else {
+      clickTimeoutRef.current = setTimeout(() => {
+        setLogoClicks(0);
+        handleTabClick('home');
+      }, 500);
+    }
+  };
+
   return (
     <header id="app-header" className="sticky top-0 z-50 bg-slate-950/80 border-b border-slate-900/85 text-white backdrop-blur-md px-4 md:px-8 py-4 transition-all">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Brand Logo */}
         <div 
           id="brand-logo" 
-          onClick={() => handleTabClick('home')} 
           className="flex items-center gap-2.5 cursor-pointer group"
         >
-          <ZenjyLogo className="w-12 h-12 text-white group-hover:scale-105 transition-transform" dark={true} />
-          <div>
+          <ZenjyLogo 
+            onClick={handleLogoSvgClick}
+            className="w-12 h-12 text-white group-hover:scale-105 transition-transform" 
+            dark={true} 
+          />
+          <div onClick={() => handleTabClick('home')}>
             <h1 className="font-heading font-black text-lg tracking-tight text-white leading-none">
               ZENJY <span className="text-[#f15a24] font-bold text-sm">MOTORS</span>
             </h1>

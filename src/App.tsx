@@ -255,6 +255,7 @@ export default function App() {
                 vehicles={vehicles}
                 onRefreshVehicles={fetchVehicles}
                 setActiveTab={setActiveTab}
+                onAdminLogin={setUser}
               />
             )}
           </>

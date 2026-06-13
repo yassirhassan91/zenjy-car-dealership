@@ -4,7 +4,7 @@ import fs from 'fs';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
-import { Vehicle, Review, User, Order, Inquiry, TestDrive, ChatMessage } from './src/types';
+import { Vehicle, Review, User, Order, Inquiry, TestDrive, ChatMessage, ContactInfo } from './src/types';
 
 // Load environment variables
 dotenv.config();
@@ -853,6 +853,18 @@ const initialUsers: User[] = [
   }
 ];
 
+const defaultContactInfo: ContactInfo = {
+  address: '500 Luxury Boulevard, Suite A, Premium District, NY 10013',
+  phone: '+1 (500) ZEN-CARS',
+  phoneRaw: '+15009362277',
+  email: 'contact@zenjy.com',
+  whatsapp: '15009362277',
+  hoursMonFri: '24 Hours / Always Open',
+  hoursSat: '24 Hours / Always Open',
+  hoursSun: '24 Hours / Always Open',
+  hoursNote: 'Showroom, Support & Direct delivery dispatches occur 24/7/365.'
+};
+
 interface Database {
   vehicles: Vehicle[];
   reviews: Review[];
@@ -860,6 +872,7 @@ interface Database {
   orders: Order[];
   inquiries: Inquiry[];
   testDrives: TestDrive[];
+  contactInfo?: ContactInfo;
 }
 
 // Loads DB or seeds initial data
@@ -875,6 +888,10 @@ function loadDB(): Database {
           modified = true;
         }
       });
+      if (!db.contactInfo) {
+        db.contactInfo = defaultContactInfo;
+        modified = true;
+      }
       if (modified) {
         fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
       }
@@ -924,7 +941,8 @@ function loadDB(): Database {
         status: 'Confirmed',
         date: '2026-06-08'
       }
-    ]
+    ],
+    contactInfo: defaultContactInfo
   };
   saveDB(db);
   return db;
@@ -1090,6 +1108,90 @@ app.post('/api/auth/wishlist', (req, res) => {
 
   saveDB(database);
   res.json({ savedVehicles: foundUser.savedVehicles, action });
+});
+
+// --- ADMIN CONTROL & SPECIAL LOGIN ---
+app.post('/api/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password) {
+    res.status(400).json({ error: 'Username and password are required.' });
+    return;
+  }
+
+  if (username === 'YASIN' && password === 'OMAR') {
+    // Retrieve or create primary administrative account
+    let adminUser = database.users.find(u => u.role === 'admin');
+    if (!adminUser) {
+      adminUser = {
+        id: 'user-admin',
+        name: 'YASIN',
+        email: 'yasin@example.com',
+        role: 'admin',
+        savedVehicles: []
+      };
+      database.users.push(adminUser);
+      saveDB(database);
+    } else {
+      // Ensure the name is aligned with the username requested
+      adminUser.name = 'YASIN';
+      saveDB(database);
+    }
+    res.json({ user: adminUser, token: adminUser.id });
+  } else {
+    res.status(401).json({ error: 'Invalid admin credentials. Please enter "YASIN" and "OMAR" as username and password.' });
+  }
+});
+
+// Admin endpoint to list all joined users
+app.get('/api/admin/users', (req, res) => {
+  const user = authenticate(req);
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: 'Access forbidden. Administrative privileges required.' });
+    return;
+  }
+  res.json(database.users);
+});
+
+// Admin endpoint to update user roles/details
+app.put('/api/admin/users/:id', (req, res) => {
+  const user = authenticate(req);
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: 'Access forbidden.' });
+    return;
+  }
+  const targetUser = database.users.find(u => u.id === req.params.id);
+  if (!targetUser) {
+    res.status(404).json({ error: 'User not found.' });
+    return;
+  }
+  const { name, email, role } = req.body;
+  if (name) targetUser.name = name;
+  if (email) targetUser.email = email;
+  if (role) targetUser.role = role;
+  saveDB(database);
+  res.json(targetUser);
+});
+
+// Admin endpoint to delete or revoke a user's membership
+app.delete('/api/admin/users/:id', (req, res) => {
+  const user = authenticate(req);
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: 'Access forbidden.' });
+    return;
+  }
+  const targetId = req.params.id;
+  if (targetId === user.id || targetId === 'user-admin') {
+    res.status(400).json({ error: 'Cannot delete the currently authenticated administrator.' });
+    return;
+  }
+  const idx = database.users.findIndex(u => u.id === targetId);
+  if (idx < 0) {
+    res.status(404).json({ error: 'User not found.' });
+    return;
+  }
+  const deleted = database.users.splice(idx, 1);
+  saveDB(database);
+  res.json({ message: 'User removed from joined system database.', deleted: deleted[0] });
 });
 
 // --- VEHICLES (INVENTORY) ---
@@ -1444,6 +1546,37 @@ app.post('/api/reviews', (req, res) => {
 
   saveDB(database);
   res.status(201).json(newReview);
+});
+
+// --- CONTACT INFORMATION ---
+app.get('/api/contact', (req, res) => {
+  res.json(database.contactInfo || defaultContactInfo);
+});
+
+app.put('/api/contact', (req, res) => {
+  const user = authenticate(req);
+  if (!isAdmin(user)) {
+    res.status(403).json({ error: 'Access forbidden. Administrative privileges required.' });
+    return;
+  }
+
+  const { address, phone, phoneRaw, email, whatsapp, hoursMonFri, hoursSat, hoursSun, hoursNote } = req.body;
+  
+  const updatedInfo: ContactInfo = {
+    address: address || '',
+    phone: phone || '',
+    phoneRaw: phoneRaw || '',
+    email: email || '',
+    whatsapp: whatsapp || '',
+    hoursMonFri: hoursMonFri || '',
+    hoursSat: hoursSat || '',
+    hoursSun: hoursSun || '',
+    hoursNote: hoursNote || ''
+  };
+
+  database.contactInfo = updatedInfo;
+  saveDB(database);
+  res.json(updatedInfo);
 });
 
 // --- STATS / ANALYTICS ---

@@ -305,7 +305,7 @@ function getMoreVehicleImages(vehicle: Vehicle): string[] {
     }
   }
   
-  return baseImages.slice(0, 12); // Always guarantee exactly 12 spectacular inspection spec images
+  return baseImages.slice(0, Math.max(12, vehicle.imageUrls.length)); // Ensure all user-uploaded photos are kept, padded up to 12 if needed
 }
 
 export default function VehicleDetailView({
@@ -537,7 +537,7 @@ export default function VehicleDetailView({
               {/* Modern WhatsApp contact redirect widget */}
               <a
                 id="whatsapp-integration-btn"
-                href={`https://wa.me/15009362277?text=Hello,%20I'm%20interested%20in%20the%20${encodeURIComponent(vehicle.year)}%20${encodeURIComponent(vehicle.make)}%20${encodeURIComponent(vehicle.model)}%2520listed%20for%2520TZS%20${vehicle.price.toLocaleString()}%20on%20Zenjy.%20Here%20is%20the%2520vehicle%20link:%20${encodeURIComponent(window.location.origin + '/?vehicle=' + vehicle.id)}`}
+                href="https://wa.me/qr/JECEMLWC2CAOA1"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3 rounded-xl border border-emerald-200 bg-emerald-50/5 hover:bg-emerald-50 text-emerald-600 hover:text-emerald-700 font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-2"
@@ -591,44 +591,6 @@ export default function VehicleDetailView({
             </div>
           </div>
 
-          {/* Custom Beforward-style Equipment & Features Grid matching image */}
-          <div id="features-grid-panel" className="bg-white border border-slate-200 rounded-3xl overflow-hidden mt-6 shadow-sm">
-            <div className="h-1.5 w-full bg-[#f15a24]"></div> {/* Warm orange bar accent matching image */}
-            <div className="p-6">
-              <h3 className="font-heading font-black text-xl text-slate-900 mb-4 tracking-tight">
-                Features
-              </h3>
-              
-              <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
-                <div role="grid" className="grid grid-cols-2 md:grid-cols-4">
-                  {ALL_IMAGE_FEATURES.map((feat, idx) => {
-                    const isActive = isFeatureActive(vehicle, feat);
-                    return (
-                      <div 
-                        key={idx} 
-                        className={`py-2.5 px-1.5 text-center text-[10.5px] md:text-xs font-semibold flex items-center justify-center min-h-[44px] transition-all border-b border-r border-slate-800/60 ${
-                          isActive 
-                            ? 'bg-slate-800 text-emerald-400 font-bold' 
-                            : 'bg-slate-900/40 text-slate-650 font-normal opacity-40'
-                        }`}
-                      >
-                        {feat}
-                      </div>
-                    );
-                  })}
-                  {/* Complete grid balance (width 4x) dynamically */}
-                  {Array.from({ length: (4 - (ALL_IMAGE_FEATURES.length % 4)) % 4 }).map((_, idx) => (
-                    <div key={`empty-${idx}`} className="hidden md:flex bg-slate-900/40 border-b border-r border-slate-800/60 min-h-[44px]"></div>
-                  ))}
-                </div>
-              </div>
-              
-              <div className="mt-4 flex items-center gap-1.5 text-[10px] text-slate-500 font-medium">
-                <span className="w-2.5 h-2.5 rounded-sm bg-slate-800 border border-emerald-500/20 inline-block"></span>
-                <span>Highlighted green slots denote verified active features configured on this premium imported vehicle.</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 

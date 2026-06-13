@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { DollarSign, ShieldCheck, ClipboardList, Car, Mail, Calendar, Settings, Plus, Edit, Trash2, X, RefreshCw, Layers, ShieldAlert } from 'lucide-react';
+import { DollarSign, ShieldCheck, ClipboardList, Car, Mail, Calendar, Settings, Plus, Edit, Trash2, X, RefreshCw, Layers, ShieldAlert, Upload, Image } from 'lucide-react';
 import { Vehicle, Order, Inquiry, TestDrive } from '../types';
 
 interface AdminViewProps {
@@ -7,13 +7,15 @@ interface AdminViewProps {
   vehicles: Vehicle[];
   onRefreshVehicles: () => void;
   setActiveTab: (tab: string) => void;
+  onAdminLogin?: (adminUser: any) => void;
 }
 
 export default function AdminView({
   currUser,
   vehicles,
   onRefreshVehicles,
-  setActiveTab
+  setActiveTab,
+  onAdminLogin
 }: AdminViewProps) {
   // Stats overview states
   const [stats, setStats] = useState({
@@ -26,19 +28,46 @@ export default function AdminView({
     statusBreakdown: { Available: 0, Sold: 0 }
   });
 
-  const [activeAdminSec, setActiveAdminSec] = useState<'overview' | 'vehicles' | 'orders' | 'inquiries' | 'test-drives'>('overview');
+  const [activeAdminSec, setActiveAdminSec] = useState<'overview' | 'vehicles' | 'orders' | 'inquiries' | 'test-drives' | 'users' | 'contact'>('overview');
   const [loading, setLoading] = useState(false);
+
+  // Business Profile details
+  const [profileAddress, setProfileAddress] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [profilePhoneRaw, setProfilePhoneRaw] = useState('');
+  const [profileEmail, setProfileEmail] = useState('');
+  const [profileWhatsapp, setProfileWhatsapp] = useState('');
+  const [profileHoursMonFri, setProfileHoursMonFri] = useState('');
+  const [profileHoursSat, setProfileHoursSat] = useState('');
+  const [profileHoursSun, setProfileHoursSun] = useState('');
+  const [profileHoursNote, setProfileHoursNote] = useState('');
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
+
+  // Special login credentials fields
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
 
   // Data lists
   const [ordersList, setOrdersList] = useState<Order[]>([]);
   const [inquiriesList, setInquiriesList] = useState<Inquiry[]>([]);
   const [testDrivesList, setTestDrivesList] = useState<TestDrive[]>([]);
+  const [usersList, setUsersList] = useState<any[]>([]);
+
+  // User details inline editor
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [editUserName, setEditUserName] = useState('');
+  const [editUserEmail, setEditUserEmail] = useState('');
+  const [editUserRole, setEditUserRole] = useState<'user' | 'admin'>('user');
 
   // Vehicle Form Popups
   const [showVehiclePopup, setShowVehiclePopup] = useState(false);
   const [editingCar, setEditingCar] = useState<Vehicle | null>(null);
 
   // Form states matching Vehicle type
+  const [category, setCategory] = useState<'Car' | 'Motorcycle'>('Car');
   const [make, setMake] = useState('');
   const [model, setModel] = useState('');
   const [year, setYear] = useState(2024);
@@ -47,8 +76,7 @@ export default function AdminView({
   const [fuelType, setFuelType] = useState<'Gasoline' | 'Diesel' | 'Electric' | 'Hybrid'>('Gasoline');
   const [transmission, setTransmission] = useState<'Automatic' | 'Manual'>('Automatic');
   const [condition, setCondition] = useState<'New' | 'Used'>('New');
-  const [image1, setImage1] = useState('');
-  const [image2, setImage2] = useState('');
+  const [photos, setPhotos] = useState<string[]>([]);
   const [description, setDescription] = useState('');
   const [featuresInput, setFeaturesInput] = useState(''); // comma separated
   const [specEngine, setSpecEngine] = useState('');
@@ -91,6 +119,26 @@ export default function AdminView({
       const tData = await tRes.json();
       if (!tData.error) setTestDrivesList(tData);
 
+      // Fetch Joined Users
+      const uRes = await fetch('/api/admin/users', { headers });
+      const uData = await uRes.json();
+      if (!uData.error) setUsersList(uData);
+
+      // Fetch Business Contact Profile
+      const cRes = await fetch('/api/contact');
+      const cData = await cRes.json();
+      if (cData && !cData.error) {
+        setProfileAddress(cData.address || '');
+        setProfilePhone(cData.phone || '');
+        setProfilePhoneRaw(cData.phoneRaw || '');
+        setProfileEmail(cData.email || '');
+        setProfileWhatsapp(cData.whatsapp || '');
+        setProfileHoursMonFri(cData.hoursMonFri || '');
+        setProfileHoursSat(cData.hoursSat || '');
+        setProfileHoursSun(cData.hoursSun || '');
+        setProfileHoursNote(cData.hoursNote || '');
+      }
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -102,6 +150,7 @@ export default function AdminView({
   const handleOpenEdit = (car: Vehicle, e: React.MouseEvent) => {
     e.stopPropagation();
     setEditingCar(car);
+    setCategory(car.category || 'Car');
     setMake(car.make);
     setModel(car.model);
     setYear(car.year);
@@ -110,8 +159,7 @@ export default function AdminView({
     setFuelType(car.fuelType);
     setTransmission(car.transmission);
     setCondition(car.condition);
-    setImage1(car.imageUrls[0] || '');
-    setImage2(car.imageUrls[1] || '');
+    setPhotos(car.imageUrls || []);
     setDescription(car.description);
     setFeaturesInput(car.features.join(', '));
     setSpecEngine(car.specs.engine);
@@ -125,9 +173,27 @@ export default function AdminView({
     setShowVehiclePopup(true);
   };
 
+  const handleUploadFiles = (files: File[]) => {
+    const remainingSlots = 20 - photos.length;
+    if (remainingSlots <= 0) return;
+    
+    const filesToLoad = files.slice(0, remainingSlots);
+    filesToLoad.forEach((file) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotos(prev => {
+          if (prev.length >= 20) return prev;
+          return [...prev, reader.result as string];
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Reset form values
   const handleOpenAdd = () => {
     setEditingCar(null);
+    setCategory('Car');
     setMake('');
     setModel('');
     setYear(2025);
@@ -136,8 +202,10 @@ export default function AdminView({
     setFuelType('Gasoline');
     setTransmission('Automatic');
     setCondition('New');
-    setImage1('https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800');
-    setImage2('https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=800');
+    setPhotos([
+      'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&q=80&w=800',
+      'https://images.unsplash.com/photo-1583121274602-3e2820c69888?auto=format&fit=crop&q=80&w=800'
+    ]);
     setDescription('Indulge in absolute luxury and precision steering. Highly configured with premium leather and standard assistance packages.');
     setFeaturesInput('Heated Steering Wheel, Park Assist Pro, Heads-up display');
     setSpecEngine('3.0L V6 Turbo');
@@ -158,6 +226,7 @@ export default function AdminView({
     const method = editingCar ? 'PUT' : 'POST';
 
     const payloads = {
+      category,
       make,
       model,
       year: parseInt(year as any),
@@ -166,7 +235,7 @@ export default function AdminView({
       fuelType,
       transmission,
       condition,
-      imageUrls: [image1, image2].filter(img => !!img.trim()),
+      imageUrls: photos.filter(img => !!img.trim()),
       specs: {
         engine: specEngine,
         horsepower: parseInt(specHP as any),
@@ -284,23 +353,188 @@ export default function AdminView({
     }
   };
 
+  const handleAdminVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError('');
+    setLoginLoading(true);
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: adminUsername, password: adminPassword })
+      });
+      const data = await res.json();
+      if (!data.error) {
+        if (onAdminLogin) {
+          onAdminLogin(data.user);
+        }
+      } else {
+        setLoginError(data.error);
+      }
+    } catch (err) {
+      console.error(err);
+      setLoginError('An unexpected networking error occurred. Make sure API nodes are operational.');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleUpdateUser = async (userId: string, name: string, email: string, role: string) => {
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currUser.id}`
+        },
+        body: JSON.stringify({ name, email, role })
+      });
+      const data = await res.json();
+      if (!data.error) {
+        setEditingUser(null);
+        loadDashboardData();
+      } else {
+        alert(`Error editing: ${data.error}`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleDeleteUser = async (userId: string) => {
+    if (!confirm('Are you entirely sure you want to remove this joined user? This action is permanent and clears their system cache.')) return;
+    try {
+      const res = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${currUser.id}` }
+      });
+      const data = await res.json();
+      if (!data.error) {
+        loadDashboardData();
+      } else {
+        alert(`Deletion error: ${data.error}`);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSaveContactInfo = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setProfileSaving(true);
+    setProfileSuccessMsg('');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currUser.id}`
+        },
+        body: JSON.stringify({
+          address: profileAddress,
+          phone: profilePhone,
+          phoneRaw: profilePhoneRaw,
+          email: profileEmail,
+          whatsapp: profileWhatsapp,
+          hoursMonFri: profileHoursMonFri,
+          hoursSat: profileHoursSat,
+          hoursSun: profileHoursSun,
+          hoursNote: profileHoursNote
+        })
+      });
+      const data = await res.json();
+      if (!data.error) {
+        setProfileSuccessMsg('✓ Business Contact details saved and synchronized successfully!');
+        setTimeout(() => setProfileSuccessMsg(''), 5000);
+      } else {
+        alert(`Failed to save details: ${data.error}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error saving contact profile details.');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
+
   // Security guard check
   if (!currUser || currUser.role !== 'admin') {
     return (
-      <div className="py-24 max-w-sm mx-auto text-center animate-fadeIn px-4">
-        <div className="h-12 w-12 bg-red-105 rounded-full flex items-center justify-center mx-auto text-red-650 border border-red-200 mb-6">
-          <ShieldAlert className="w-6 h-6" />
+      <div className="py-20 md:py-28 max-w-md mx-auto animate-fadeIn px-4 text-white">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-2xl relative">
+          <div className="h-14 w-14 bg-blue-500/10 rounded-2xl flex items-center justify-center mx-auto text-blue-400 border border-blue-500/20 mb-6">
+            <ShieldCheck className="w-8 h-8 animate-pulse" />
+          </div>
+          
+          <h2 className="font-heading font-black text-xl text-center text-white uppercase tracking-tight">
+            ZENJY MOTORS MASTER PANEL
+          </h2>
+          <p className="text-[11px] text-slate-400 mt-2 text-center leading-relaxed mb-6 font-mono">
+            AUTHORIZATION REQUIRED. ENTER MASTER CONTROLLER CREDENTIALS KEYS TO LOG IN.
+          </p>
+
+          <form onSubmit={handleAdminVerify} className="flex flex-col gap-4 text-xs">
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase font-black mb-1.5 tracking-wider font-mono">
+                Admin Username
+              </label>
+              <input
+                id="admin-username-input"
+                type="text"
+                required
+                value={adminUsername}
+                onChange={(e) => setAdminUsername(e.target.value)}
+                placeholder="Username"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white placeholder-slate-700 outline-none focus:border-blue-500 font-bold tracking-wide"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] text-slate-400 uppercase font-black mb-1.5 tracking-wider font-mono">
+                Admin Password
+              </label>
+              <input
+                id="admin-password-input"
+                type="password"
+                required
+                value={adminPassword}
+                onChange={(e) => setAdminPassword(e.target.value)}
+                placeholder="••••••••••••••"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-white placeholder-slate-700 outline-none focus:border-blue-500"
+              />
+            </div>
+
+            {loginError && (
+              <p className="text-red-400 font-semibold bg-red-950/20 border border-red-900/30 p-3 rounded-xl leading-relaxed text-[11px]">
+                ⚠ {loginError}
+              </p>
+            )}
+
+            <button
+              id="admin-login-submit"
+              type="submit"
+              disabled={loginLoading}
+              className="w-full py-3 mt-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider cursor-pointer shadow-lg shadow-blue-500/15 transition-all text-center flex items-center justify-center gap-1.5"
+            >
+              {loginLoading ? (
+                <>
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin" /> Verifying Keys...
+                </>
+              ) : (
+                'Decrypt & Command'
+              )}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
+            <button
+              onClick={() => setActiveTab('home')}
+              className="text-[11px] text-slate-400 hover:text-blue-400 font-semibold font-mono"
+            >
+              ← Cancel and Return to Showroom
+            </button>
+          </div>
         </div>
-        <h2 className="font-heading font-extrabold text-lg text-slate-950 uppercase leading-none">Access Restrained</h2>
-        <p className="text-xs text-slate-450 mt-2 leading-relaxed mb-6">
-          Administrator level privilege credentials required. Please login with accounts indicating administrative rights to open this command portal.
-        </p>
-        <button
-          onClick={() => setActiveTab('account')}
-          className="px-5 py-2.5 rounded-lg bg-blue-600 text-white font-bold text-xs cursor-pointer"
-        >
-          Sign in Admin Account
-        </button>
       </div>
     );
   }
@@ -321,7 +555,9 @@ export default function AdminView({
             { id: 'overview', label: 'Stats Overview', icon: DollarSign },
             { id: 'vehicles', label: 'Catalog Manager', icon: Car },
             { id: 'orders', label: 'Pipeline Wires', icon: ClipboardList },
-            { id: 'inquiries', label: 'Inquiries Inbox', icon: Mail }
+            { id: 'inquiries', label: 'Inquiries Inbox', icon: Mail },
+            { id: 'users', label: 'Joined Users', icon: ShieldCheck },
+            { id: 'contact', label: 'Dealership Profile', icon: Settings }
           ].map(sec => {
             const Icon = sec.icon;
             return (
@@ -460,38 +696,79 @@ export default function AdminView({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {vehicles.map(car => (
-              <div key={car.id} className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-none relative p-4.5 flex gap-4 text-white">
-                <div className="h-20 w-28 bg-slate-950 rounded-xl overflow-hidden shrink-0 self-center">
+              <div key={car.id} className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-none flex flex-col text-white transition-all hover:border-slate-700/60">
+                {/* Vehicle Image & Badge HUD */}
+                <div className="h-44 w-full bg-slate-950 relative overflow-hidden">
                   <img src={car.imageUrls[0]} alt={car.model} className="w-full h-full object-cover" />
+                  
+                  {/* Category badge */}
+                  <span className="absolute top-3 left-3 px-2 py-0.5 rounded-lg bg-slate-900/90 border border-slate-800 text-[9px] font-bold font-mono uppercase tracking-wider text-slate-300 backdrop-blur-md">
+                    {car.category}
+                  </span>
+                  
+                  {/* Availability badge/toggle */}
+                  <div className="absolute top-3 right-3">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        const newStatus = car.availability === 'Available' ? 'Sold' : 'Available';
+                        fetch(`/api/vehicles/${car.id}`, {
+                          method: 'PUT',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currUser.id}`
+                          },
+                          body: JSON.stringify({ availability: newStatus })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                          if (!data.error) {
+                            onRefreshVehicles();
+                            loadDashboardData();
+                          }
+                        });
+                      }}
+                      className={`inline-block text-[10px] font-bold uppercase rounded-lg px-2.5 py-1.5 transition-all border cursor-pointer backdrop-blur-md ${
+                        car.availability === 'Available' 
+                          ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/25' 
+                          : 'bg-red-500/15 text-red-400 border-red-500/30 hover:bg-red-500/25'
+                      }`}
+                      title="Click to toggle status"
+                    >
+                      {car.availability}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="flex-1 flex flex-col justify-between">
+                {/* Content Panel */}
+                <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
-                    <h4 className="font-heading font-extrabold text-sm text-white leading-tight truncate">{car.make} {car.model}</h4>
-                    <p className="text-[10px] text-slate-400 mt-1">{car.year} • {car.fuelType} • TZS {car.price.toLocaleString()}</p>
-                    <span className={`inline-block text-[9px] font-bold uppercase rounded px-1.5 py-0.5 mt-2 ${
-                      car.availability === 'Available' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-450 border border-red-500/20'
-                    }`}>
-                      {car.availability}
-                    </span>
+                    <h4 className="font-heading font-black text-base text-white tracking-tight leading-tight">{car.make} {car.model}</h4>
+                    <p className="text-[11px] text-slate-400 mt-1.5 font-mono">
+                      {car.year} • {car.fuelType} • {car.transmission}
+                    </p>
+                    <p className="font-heading font-black text-base text-blue-400 mt-2">
+                      TZS {car.price.toLocaleString()}
+                    </p>
                   </div>
 
-                  <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-slate-800">
+                  {/* Labeled Edit and Delete Buttons */}
+                  <div className="grid grid-cols-2 gap-2.5 mt-5 pt-4 border-t border-slate-800/80">
                     <button
                       onClick={(e) => handleOpenEdit(car, e)}
-                      className="p-1.5 rounded bg-slate-950 hover:bg-slate-800 text-blue-400 cursor-pointer"
-                      title="Edit specifications"
+                      className="py-2 px-3 rounded-xl bg-slate-950 hover:bg-slate-800 text-blue-450 hover:text-blue-400 font-bold text-xs transition-colors border border-slate-800 hover:border-slate-700 flex items-center justify-center gap-1.5 cursor-pointer"
+                      title="Edit vehicle details"
                     >
-                      <Edit className="w-3.5 h-3.5" />
+                      <Edit className="w-3.5 h-3.5" /> Edit
                     </button>
                     <button
                       onClick={(e) => handleDeleteVehicle(car.id, e)}
-                      className="p-1.5 rounded bg-red-950/20 text-red-400 hover:bg-slate-800 cursor-pointer"
-                      title="Delete vehicle from data"
+                      className="py-2 px-3 rounded-xl bg-red-950/15 hover:bg-red-950/30 text-red-450 hover:text-red-400 font-bold text-xs transition-colors border border-red-500/10 hover:border-red-500/20 flex items-center justify-center gap-1.5 cursor-pointer"
+                      title="Delete vehicle asset"
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-3.5 h-3.5" /> Delete
                     </button>
                   </div>
                 </div>
@@ -507,7 +784,7 @@ export default function AdminView({
           <div className="flex flex-col gap-6">
             {ordersList.length > 0 ? (
               ordersList.map(ord => (
-                <div key={ord.id} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-none flex flex-col md:flex-row justify-between gap-6.5 text-xs text-slate-200">
+                <div key={ord.id} className="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-none flex flex-col md:flex-row justify-between gap-6 text-xs text-slate-200">
                   <div className="flex-1">
                     <div className="flex gap-2.5 items-center mb-2.5">
                       <span className="font-mono font-bold text-white">ORDER REFID: {ord.id}</span>
@@ -690,6 +967,351 @@ export default function AdminView({
         </div>
       )}
 
+      {/* SECTION 5: REGISTERED SYSTEM MEMBERS */}
+      {activeAdminSec === 'users' && (
+        <div id="section-users" className="animate-fadeIn">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+            <div>
+              <h3 className="font-heading font-black text-lg text-white uppercase tracking-wider">
+                Joined System Ledger
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5 font-mono">
+                CONTROL REGISTERED MEMBERS REGISTERED DIRECTLY ON THE SHOWROOM APP PLATFORM.
+              </p>
+            </div>
+            <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-[10px] font-mono text-slate-400">
+              Total Active Nodes: <span className="font-bold text-blue-400">{usersList.length}</span>
+            </div>
+          </div>
+
+          {editingUser && (
+            <div className="bg-slate-950 border border-slate-800 p-6 rounded-2xl mb-6 animate-fadeIn text-white">
+              <div className="flex justify-between items-center mb-4">
+                <h4 className="font-heading font-bold text-sm text-white uppercase tracking-wider">
+                  🔐 Modify Node Privileges
+                </h4>
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="p-1 rounded-md bg-slate-800 text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs mb-4">
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black font-mono mb-1">
+                    Display Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editUserName}
+                    onChange={(e) => setEditUserName(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-800 bg-slate-900 rounded-xl text-white outline-none focus:border-blue-500 font-bold"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black font-mono mb-1">
+                    Email Stream Link
+                  </label>
+                  <input
+                    type="email"
+                    value={editUserEmail}
+                    onChange={(e) => setEditUserEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-800 bg-slate-900 rounded-xl text-white outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black font-mono mb-1">
+                    Privilege Role Levels
+                  </label>
+                  <select
+                    value={editUserRole}
+                    onChange={(e) => setEditUserRole(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-slate-800 bg-slate-900 rounded-xl text-white outline-none focus:border-blue-500"
+                  >
+                    <option value="user">Standard Agent Client ('user')</option>
+                    <option value="admin">Platform Administrator ('admin')</option>
+                  </select>
+                </div>
+              </div>
+               <div className="flex justify-end gap-2 text-xs">
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold"
+                >
+                  Discard Changes
+                </button>
+                <button
+                  onClick={() => handleUpdateUser(editingUser.id, editUserName, editUserEmail, editUserRole)}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold"
+                >
+                  Commit Privileges
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {usersList.length > 0 ? (
+              usersList.map((user) => (
+                <div
+                  key={user.id}
+                  className={`bg-slate-900 border ${
+                    user.role === 'admin' ? 'border-amber-500/35' : 'border-slate-800'
+                  } p-5 rounded-2xl flex flex-col justify-between text-white transition-all hover:scale-[1.015] shadow-lg`}
+                >
+                  <div>
+                    <div className="flex justify-between items-start gap-2.5 mb-3">
+                      <div className="h-10 w-10 flex items-center justify-center bg-slate-800 border border-slate-800 rounded-xl text-blue-400 font-bold uppercase text-xs">
+                        {user.name.slice(0, 2)}
+                      </div>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[8px] tracking-widest font-mono uppercase border shrink-0 ${
+                          user.role === 'admin'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+                        }`}
+                      >
+                        {user.role}
+                      </span>
+                    </div>
+
+                    <h4 id={`user-name-${user.id}`} className="font-heading font-black text-sm text-white truncate">
+                      {user.name}
+                    </h4>
+                    <p className="text-[10px] text-slate-400 font-mono tracking-wide mt-1 truncate">
+                      {user.email || 'No email links recorded'}
+                    </p>
+                    <p className="text-[8px] text-amber-500/80 font-mono mt-1.5">
+                      NODE_ID: <span className="font-bold">{user.id}</span>
+                    </p>
+                  </div>
+
+                  <div className="mt-5 pt-4 border-t border-slate-800/85 flex items-center justify-end gap-2.5">
+                    <button
+                      onClick={() => {
+                        setEditingUser(user);
+                        setEditUserName(user.name);
+                        setEditUserEmail(user.email || '');
+                        setEditUserRole(user.role);
+                      }}
+                      className="p-1.5 px-2.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors border border-slate-700"
+                      title="Edit Account Details"
+                    >
+                      <Edit className="w-3 h-3" /> Edit
+                    </button>
+                    <button
+                      disabled={user.id === currUser.id || user.id === 'user-admin'}
+                      onClick={() => handleDeleteUser(user.id)}
+                      className={`p-1.5 px-2.5 rounded-lg text-[10px] font-bold flex items-center gap-1 cursor-pointer transition-colors border ${
+                        user.id === currUser.id || user.id === 'user-admin'
+                          ? 'opacity-30 cursor-not-allowed bg-slate-800 text-slate-600 border-slate-800'
+                          : 'bg-red-950/30 text-red-400 border-red-950/40 hover:bg-red-950/55'
+                      }`}
+                      title="De-register Account Node"
+                    >
+                      <Trash2 className="w-3 h-3" /> Dissolve
+                    </button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-16 text-center border-2 border-dashed border-slate-800/80 bg-slate-900 rounded-3xl">
+                <p className="text-sm text-slate-400 italic">No nodes joined the platform network yet.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* SECTION 6: DEALERSHIP PROFILE SETTINGS */}
+      {activeAdminSec === 'contact' && (
+        <div id="section-contact-settings" className="animate-fadeIn">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <div>
+              <h3 className="font-heading font-black text-xl text-white uppercase tracking-wider">
+                Dealership Profile & Contact Details
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-1 font-mono">
+                UPDATE CHANNELS, OPERATING HOURS, AND PHYSICAL LOCATION IN REAL-TIME.
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveContactInfo} className="bg-slate-900 border border-slate-800 rounded-3xl p-8 text-xs text-slate-300 max-w-4xl">
+            {profileSuccessMsg && (
+              <div className="mb-6 p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/20 text-emerald-400 font-bold flex items-center gap-2">
+                <ShieldCheck className="w-5 h-5 shrink-0" />
+                <p>{profileSuccessMsg}</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              {/* Left Form: General Channel Links */}
+              <div className="flex flex-col gap-5">
+                <h4 className="font-heading font-bold text-sm text-white uppercase border-b border-slate-800 pb-2 tracking-wide">
+                  Direct Contact Information
+                </h4>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Showroom Physical Address
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={profileAddress}
+                    onChange={(e) => setProfileAddress(e.target.value)}
+                    placeholder="E.g. 500 Luxury Boulevard, Suite A, Premium District, NY 10013"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500 font-sans"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Sales Phone Line (Display Text)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profilePhone}
+                    onChange={(e) => setProfilePhone(e.target.value)}
+                    placeholder="E.g. +1 (500) ZEN-CARS"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500 font-bold"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Dialable Phone Link (Raw Digits)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profilePhoneRaw}
+                    onChange={(e) => setProfilePhoneRaw(e.target.value)}
+                    placeholder="E.g. +15009362277"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500 font-mono text-[11px]"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">Used on click of a telephone anchor.</p>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Advisory Email Inbox
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={profileEmail}
+                    onChange={(e) => setProfileEmail(e.target.value)}
+                    placeholder="E.g. contact@zenjy.com"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    WhatsApp Hotline Number (Digits Only)
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileWhatsapp}
+                    onChange={(e) => setProfileWhatsapp(e.target.value)}
+                    placeholder="E.g. 15009362277"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500 font-mono text-[11px]"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">Digits only, no symbols, spaces or leading zeros (like '15009362277').</p>
+                </div>
+              </div>
+
+              {/* Right Form: Operating hours configuration */}
+              <div className="flex flex-col gap-5">
+                <h4 className="font-heading font-bold text-sm text-white uppercase border-b border-slate-800 pb-2 tracking-wide">
+                  Office Operating Hours
+                </h4>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Monday - Friday Schedule
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileHoursMonFri}
+                    onChange={(e) => setProfileHoursMonFri(e.target.value)}
+                    placeholder="E.g. 24 Hours / Always Open"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Saturday Schedule
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileHoursSat}
+                    onChange={(e) => setProfileHoursSat(e.target.value)}
+                    placeholder="E.g. 24 Hours / Always Open"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Sunday Schedule
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileHoursSun}
+                    onChange={(e) => setProfileHoursSun(e.target.value)}
+                    placeholder="E.g. 24 Hours / Always Open"
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[10px] text-slate-400 uppercase font-black mb-2 tracking-wider font-mono">
+                    Hours Advisory Notice Note
+                  </label>
+                  <textarea
+                    required
+                    rows={4}
+                    value={profileHoursNote}
+                    onChange={(e) => setProfileHoursNote(e.target.value)}
+                    placeholder="E.g. Showroom, Support & Direct delivery dispatches occur 24/7/365."
+                    className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 outline-none focus:border-blue-300 font-sans"
+                  />
+                  <p className="text-[10px] text-slate-500 mt-1">Appears at footer of operating hours block card.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-4 border-t border-slate-800/80">
+              <button
+                type="submit"
+                disabled={profileSaving}
+                className="px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold inline-flex items-center gap-1.5 transition-all cursor-pointer text-xs uppercase tracking-wider"
+              >
+                {profileSaving ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" /> Synchronizing...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck className="w-4 h-4" /> Save Dealership Profile
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
       {/* POPUP FOR ADD OR EDIT VEHICLE SPECIFICATIONS */}
       {showVehiclePopup && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-[3px] z-50 flex items-center justify-center p-4">
@@ -707,6 +1329,30 @@ export default function AdminView({
             </div>
 
             <form onSubmit={handleVehicleSubmit} className="flex flex-col gap-4 text-xs text-slate-300">
+              <div className="bg-slate-950 border border-slate-850 p-4 rounded-2xl flex items-center justify-between gap-4">
+                <div>
+                  <h4 className="font-bold text-white uppercase font-mono text-[9px] mb-1">Vehicle Classification Category</h4>
+                  <p className="text-[10px] text-slate-400">Classify as Car or Motorcycle to dynamically sort into target catalog categories.</p>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  {['Car', 'Motorcycle'].map((cat) => (
+                    <button
+                      id={`category-btn-${cat.toLowerCase()}`}
+                      key={cat}
+                      type="button"
+                      onClick={() => setCategory(cat as any)}
+                      className={`px-3.5 py-1.5 rounded-xl text-[10px] font-extrabold uppercase transition-all tracking-wider ${
+                        category === cat
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'bg-slate-900 border border-slate-800 text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {cat}s
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Make / Brand</label>
@@ -816,29 +1462,99 @@ export default function AdminView({
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Primary Image URL</label>
-                  <input
-                    type="text"
-                    required
-                    value={image1}
-                    onChange={(e) => setImage1(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-slate-950 text-white"
-                  />
+              {/* Dynamic Multi-Photo Uploader Grid */}
+              <div id="vehicle-photos-control-block" className="bg-slate-950 border border-slate-800 rounded-2xl p-5 col-span-1 md:col-span-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-2">
+                  <div>
+                    <h4 className="font-bold text-white text-sm">Vehicle Photos Grid</h4>
+                    <p className="text-[10px] text-slate-400 mt-0.5">Upload a primary beauty photo plus up to 19 optional secondary/thumbnail photos (Max 20 total)</p>
+                  </div>
+                  <span id="photo-count-badge" className="text-[10px] font-mono text-slate-400 font-bold bg-slate-900 border border-slate-800 rounded-lg px-2 py-1">
+                    {photos.length} / 20 Photos Added
+                  </span>
                 </div>
-                <div>
-                  <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Thumbnail Image URL (Optional)</label>
-                  <input
-                    type="text"
-                    value={image2}
-                    onChange={(e) => setImage2(e.target.value)}
-                    className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-slate-950 text-white"
-                  />
+
+                <div id="photos-grid-layout" className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                  {photos.map((photo, index) => (
+                    <div key={index} id={`photo-thumbnail-card-${index}`} className="relative group/pic aspect-video rounded-xl bg-slate-900 border border-slate-800 overflow-hidden h-28">
+                      <img src={photo} alt={`Vehicle slot ${index}`} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                      
+                      {/* Banner label for primary / optional index */}
+                      <div className={`absolute top-2 left-2 px-1.5 py-0.5 rounded text-[8px] font-bold font-mono uppercase tracking-wider backdrop-blur-md ${
+                        index === 0 
+                          ? 'bg-blue-600/80 text-white border border-blue-400/20' 
+                          : 'bg-slate-900/85 text-slate-300 border border-slate-800'
+                      }`}>
+                        {index === 0 ? 'Primary Photo' : `Optional Photo ${index + 1}`}
+                      </div>
+
+                      {/* Control panel hover layer */}
+                      <div className="absolute inset-0 bg-slate-950/75 opacity-0 group-hover/pic:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1.5 p-2">
+                        {index > 0 ? (
+                          <button
+                            id={`btn-set-primary-${index}`}
+                            type="button"
+                            onClick={() => {
+                              // Move to main first item
+                              const updated = [photo, ...photos.filter((_, i) => i !== index)];
+                              setPhotos(updated);
+                            }}
+                            className="w-full py-1 bg-blue-600 hover:bg-blue-500 text-white font-mono text-[9px] font-bold rounded-lg transition-colors cursor-pointer"
+                          >
+                            Set Primary
+                          </button>
+                        ) : (
+                          <span className="text-[9px] font-mono text-blue-400 font-black tracking-wider">PRIMARY ACTIVE</span>
+                        )}
+                        <button
+                          id={`btn-delete-photo-${index}`}
+                          type="button"
+                          onClick={() => {
+                            setPhotos(photos.filter((_, i) => i !== index));
+                          }}
+                          className="w-full py-1 rounded-lg bg-red-950/80 hover:bg-red-900 text-red-400 border border-red-500/20 font-mono text-[9px] font-bold cursor-pointer transition-colors"
+                        >
+                          Remove Photo
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Add photo slot button */}
+                  {photos.length < 20 && (
+                    <div
+                      id="photo-uploader-dragzone-card"
+                      className="relative group hover:border-blue-500 hover:bg-blue-950/15 border-2 border-dashed border-slate-800 rounded-xl flex flex-col items-center justify-center p-4 bg-slate-950 text-center h-28 cursor-pointer transition-all"
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const files = Array.from(e.dataTransfer.files || []) as File[];
+                        handleUploadFiles(files);
+                      }}
+                    >
+                      <Upload className="w-5 h-5 text-slate-400 group-hover:text-blue-400 mb-1.5 transition-colors" />
+                      <span className="text-[10px] font-bold text-slate-300">Add Vehicle Photo</span>
+                      <span className="text-[8px] text-slate-500 mt-0.5 font-mono">Drag multi-files or Click</span>
+                      
+                      <input
+                        id="multi-photo-file-input"
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files || []) as File[];
+                          handleUploadFiles(files);
+                        }}
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="bg-slate-950 border border-slate-850 rounded-2xl p-4.5">
+              <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5">
                 <h4 className="font-bold text-white uppercase font-mono text-[9px] mb-3">Subsystem Specifications Parameters</h4>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5">
                   <div>
@@ -866,17 +1582,6 @@ export default function AdminView({
                     <input type="text" value={specInt} onChange={(e) => setSpecInt(e.target.value)} className="w-full px-2 py-1.5 text-white rounded-lg border bg-slate-900 border-slate-800 text-white" />
                   </div>
                 </div>
-              </div>
-
-              <div>
-                <label className="block text-[10px] text-slate-400 uppercase font-bold mb-1">Custom Features Bullets (Comma Separated)</label>
-                <input
-                  type="text"
-                  value={featuresInput}
-                  onChange={(e) => setFeaturesInput(e.target.value)}
-                  placeholder="Carbon Diffuser, Air Suspension, Laser lights, Active HUD"
-                  className="w-full px-3 py-2 rounded-xl border border-slate-800 bg-slate-950 text-white placeholder-slate-600"
-                />
               </div>
 
               <div>

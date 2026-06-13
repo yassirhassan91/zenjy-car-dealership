@@ -1,6 +1,7 @@
-import React from 'react';
-import { Mail, Phone, MapPin, Clock, Twitter, Facebook, Instagram, ShieldCheck, CreditCard, Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, Phone, MapPin, Clock, Twitter, Facebook, Instagram, ShieldCheck, CreditCard } from 'lucide-react';
 import ZenjyLogo from './ZenjyLogo';
+import { ContactInfo } from '../types';
 
 interface FooterProps {
   setActiveTab: (tab: string) => void;
@@ -8,6 +9,29 @@ interface FooterProps {
 }
 
 export default function Footer({ setActiveTab, setSelectedVehicleId }: FooterProps) {
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    address: '500 Luxury Boulevard, Suite A, Premium District, NY 10013',
+    phone: '+1 (500) ZEN-CARS',
+    phoneRaw: '+15009362277',
+    email: 'contact@zenjy.com',
+    whatsapp: '15009362277',
+    hoursMonFri: '24 Hours / Always Open',
+    hoursSat: '24 Hours / Always Open',
+    hoursSun: '24 Hours / Always Open',
+    hoursNote: 'Showroom, Support & Direct delivery dispatches occur 24/7/365.'
+  });
+
+  useEffect(() => {
+    fetch('/api/contact')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setContactInfo(data);
+        }
+      })
+      .catch((err) => console.error('Error fetching footer context:', err));
+  }, []);
+
   const handleNav = (tab: string) => {
     setActiveTab(tab);
     setSelectedVehicleId(null);
@@ -67,10 +91,12 @@ export default function Footer({ setActiveTab, setSelectedVehicleId }: FooterPro
           <h4 className="font-heading font-bold text-white text-sm tracking-widest uppercase">Operating Hours</h4>
           <div className="flex flex-col gap-3 text-sm">
             <div className="flex gap-2.5 items-start">
-              <Clock className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5 animate-pulse" />
+              <Clock className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-emerald-400">Always Open (24 / 7)</p>
-                <p className="text-xs text-slate-400">Showroom, Online Fleet Consultation, & Deliveries 24 Hours / 365 Days</p>
+                <p className="font-bold text-emerald-400">Weekly Business Schedule</p>
+                <p className="text-xs text-slate-400">Weekdays: {contactInfo.hoursMonFri}</p>
+                <p className="text-xs text-slate-400">Saturday: {contactInfo.hoursSat}</p>
+                <p className="text-xs text-slate-400">Sunday: {contactInfo.hoursSun}</p>
               </div>
             </div>
             <div className="flex gap-2.5 items-center">
@@ -87,27 +113,27 @@ export default function Footer({ setActiveTab, setSelectedVehicleId }: FooterPro
             <div className="flex gap-2.5 items-start">
               <MapPin className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
               <p className="text-[13px] leading-relaxed">
-                500 Luxury Boulevard, Suite A, Premium District, NY 10013
+                {contactInfo.address}
               </p>
             </div>
             <div className="flex gap-2.5 items-center">
               <Phone className="w-4 h-4 text-blue-500 shrink-0" />
-              <a href="tel:+15009362277" className="hover:text-white transition-colors text-slate-300">
-                +1 (500) ZEN-CARS
+              <a href={`tel:${contactInfo.phoneRaw}`} className="hover:text-white transition-colors text-slate-300">
+                {contactInfo.phone}
               </a>
             </div>
             <div className="flex gap-2.5 items-center">
               <Mail className="w-4 h-4 text-blue-500 shrink-0" />
-              <a href="mailto:contact@zenjy.com" className="hover:text-white transition-colors text-slate-300">
-                contact@zenjy.com
+              <a href={`mailto:${contactInfo.email}`} className="hover:text-white transition-colors text-slate-300">
+                {contactInfo.email}
               </a>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto border-t border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
-        <p>© 2026 ZENJY MOTORS DEALERSHIP. All rights reserved. Built using premium Full-Stack React technology.</p>
+      <div className="max-w-7xl mx-auto border-t border-slate-900 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs font-mono">
+        <p>© 2026 ZENJY MOTORS DEALERSHIP. ALL RIGHTS RESERVED. {contactInfo.hoursNote}</p>
         <div className="flex items-center gap-6">
           <p className="text-slate-500 flex items-center gap-1">
             <CreditCard className="w-3.5 h-3.5" /> Secured SSL Transactions

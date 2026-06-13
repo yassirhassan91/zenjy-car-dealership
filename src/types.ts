@@ -89,3 +89,16 @@ export interface ChatMessage {
   content: string;
   timestamp: string;
 }
+
+export interface ContactInfo {
+  address: string;
+  phone: string;
+  phoneRaw: string;
+  email: string;
+  whatsapp: string;
+  hoursMonFri: string;
+  hoursSat: string;
+  hoursSun: string;
+  hoursNote: string;
+}
+

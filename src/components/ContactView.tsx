@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Mail, Phone, MapPin, Clock, MessageSquare, Send, CheckCircle, Smartphone } from 'lucide-react';
+import { ContactInfo } from '../types';
 
 export default function ContactView() {
   const [userName, setUserName] = useState('');
@@ -8,6 +9,29 @@ export default function ContactView() {
   const [userMessage, setUserMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const [contactInfo, setContactInfo] = useState<ContactInfo>({
+    address: '500 Luxury Boulevard, Suite A, Premium District, NY 10013',
+    phone: '+1 (500) ZEN-CARS',
+    phoneRaw: '+15009362277',
+    email: 'contact@zenjy.com',
+    whatsapp: '15009362277',
+    hoursMonFri: '24 Hours / Always Open',
+    hoursSat: '24 Hours / Always Open',
+    hoursSun: '24 Hours / Always Open',
+    hoursNote: 'Showroom, Support & Direct delivery dispatches occur 24/7/365.'
+  });
+
+  useEffect(() => {
+    fetch('/api/contact')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && !data.error) {
+          setContactInfo(data);
+        }
+      })
+      .catch((err) => console.error('Error loading dynamic contact layout:', err));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,8 +90,8 @@ export default function ContactView() {
                   <MapPin className="w-5 h-5" />
                 </div>
                 <div>
-                  <p className="font-bold text-slate-100 uppercase tracking-wider text-[10px]">Headquarters Address</p>
-                  <p className="mt-1 leading-relaxed text-sm">500 Luxury Boulevard, Suite A, Premium District, NY 10013</p>
+                  <p className="font-bold text-slate-100 uppercase tracking-wider text-[10px]">ADDRESS</p>
+                  <p className="mt-1 leading-relaxed text-sm">{contactInfo.address}</p>
                 </div>
               </div>
 
@@ -78,8 +102,8 @@ export default function ContactView() {
                 <div>
                   <p className="font-bold text-slate-100 uppercase tracking-wider text-[10px]">Sales Telephone Line</p>
                   <p className="mt-1 leading-relaxed text-sm text-slate-200">
-                    <a href="tel:+15009362277" className="hover:text-blue-400 transition-colors">
-                      +1 (500) ZEN-CARS
+                    <a href={`tel:${contactInfo.phoneRaw}`} className="hover:text-blue-400 transition-colors">
+                      {contactInfo.phone}
                     </a>
                   </p>
                   <p className="text-slate-500 text-[10px] mt-0.5">International/Regional wires options</p>
@@ -93,8 +117,8 @@ export default function ContactView() {
                 <div>
                   <p className="font-bold text-slate-100 uppercase tracking-wider text-[10px]">Advisory Email Inbox</p>
                   <p className="mt-1 leading-relaxed text-sm text-slate-200">
-                    <a href="mailto:contact@zenjy.com" className="hover:text-blue-400 transition-colors">
-                      contact@zenjy.com
+                    <a href={`mailto:${contactInfo.email}`} className="hover:text-blue-400 transition-colors">
+                      {contactInfo.email}
                     </a>
                   </p>
                 </div>
@@ -108,18 +132,18 @@ export default function ContactView() {
             <div className="flex flex-col gap-3 text-xs text-slate-300">
               <div className="flex justify-between py-1.5 border-b border-slate-800">
                 <span className="font-bold text-slate-200">Monday - Friday</span>
-                <span className="text-emerald-400 font-bold">24 Hours / Always Open</span>
+                <span className="text-emerald-400 font-bold">{contactInfo.hoursMonFri}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-800">
                 <span className="font-bold text-slate-200">Saturday</span>
-                <span className="text-emerald-400 font-bold">24 Hours / Always Open</span>
+                <span className="text-emerald-400 font-bold">{contactInfo.hoursSat}</span>
               </div>
               <div className="flex justify-between py-1.5 border-b border-slate-800">
                 <span className="font-bold text-slate-200">Sunday</span>
-                <span className="text-emerald-400 font-bold">24 Hours / Always Open</span>
+                <span className="text-emerald-400 font-bold">{contactInfo.hoursSun}</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-slate-400 mt-2">
-                <Clock className="w-3.5 h-3.5 text-emerald-500 animate-pulse" /> Showroom, Support & Direct delivery dispatches occur 24/7/365.
+                <Clock className="w-3.5 h-3.5 text-emerald-500" /> {contactInfo.hoursNote}
               </div>
             </div>
           </div>
@@ -185,7 +209,7 @@ export default function ContactView() {
 
             <div className="flex flex-col sm:flex-row gap-4 items-center justify-between mt-2">
               <a
-                href="https://wa.me/15009362277?text=Hello%20Zenjy%20Motors.%20I'd%20love%20to%20chat%20live%25"
+                href={`https://wa.me/${contactInfo.whatsapp}?text=Hello%20Zenjy%20Motors.%20I'd%20love%20to%20chat%20live%25`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 bg-emerald-600/15 border border-emerald-500/20 px-4 py-2 rounded-xl"

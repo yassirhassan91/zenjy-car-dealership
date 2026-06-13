@@ -3,9 +3,10 @@ import React from 'react';
 interface ZenjyLogoProps {
   className?: string;
   dark?: boolean;
+  onClick?: React.MouseEventHandler<SVGSVGElement>;
 }
 
-export default function ZenjyLogo({ className = "w-16 h-16", dark = true }: ZenjyLogoProps) {
+export default function ZenjyLogo({ className = "w-16 h-16", dark = true, onClick }: ZenjyLogoProps) {
   // Brand colors based on the image:
   // - Orange: #F15A24 (vibrant orange)
   // - Dark Navy: #152E4E (sleek dark blue)
@@ -22,6 +23,7 @@ export default function ZenjyLogo({ className = "w-16 h-16", dark = true }: Zenj
       className={`transition-all duration-300 ${className}`} 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
+      onClick={onClick}
     >
       <g id="zenjy-motors-logo-group">
         {/* Concentric Circle Frames */}

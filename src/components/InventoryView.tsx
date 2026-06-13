@@ -157,7 +157,7 @@ export default function InventoryView({
           }`}
         >
           <Car className="w-4 h-4" />
-          Car
+          car
           {activeCategory === 'Car' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
           )}
@@ -174,7 +174,7 @@ export default function InventoryView({
           }`}
         >
           <Bike className="w-4 h-4" />
-          Motorcycle
+          motorcycle
           {activeCategory === 'Motorcycle' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>
           )}
@@ -400,15 +400,6 @@ export default function InventoryView({
                   <h3 className="font-heading font-extrabold text-base text-slate-900 mt-1">
                     {car.make} <span className="font-medium text-slate-600">{car.model}</span>
                   </h3>
-
-                  {/* Quick features overview bullets list */}
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {car.features.slice(0, 2).map((feat, idx) => (
-                      <span key={idx} className="text-[10px] bg-slate-50 border border-slate-100 rounded-lg px-2 py-1 text-slate-500">
-                        {feat}
-                      </span>
-                    ))}
-                  </div>
 
                   {/* Horizontal dividers & specs points */}
                   <div className="grid grid-cols-2 gap-1.5 bg-slate-50/50 border border-slate-100 rounded-xl py-2 px-3 mt-4 text-[11px] text-slate-500 text-center font-mono">
