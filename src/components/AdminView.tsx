@@ -524,6 +524,18 @@ export default function AdminView({
                 'Decrypt & Command'
               )}
             </button>
+
+            <button
+              id="admin-prefill-btn"
+              type="button"
+              onClick={() => {
+                setAdminUsername('YASIN');
+                setAdminPassword('OMAR');
+              }}
+              className="w-full py-2.5 rounded-xl border border-slate-800 bg-slate-950 text-slate-400 hover:bg-slate-900 hover:text-white font-semibold text-[10px] tracking-widest font-mono uppercase transition-all text-center mt-3"
+            >
+              ⚡ AUTO-FILL SECURE ADMIN KEYS
+            </button>
           </form>
 
           <div className="mt-6 pt-5 border-t border-slate-800/80 text-center">
