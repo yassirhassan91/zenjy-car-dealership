@@ -1110,6 +1110,92 @@ app.post('/api/auth/wishlist', (req, res) => {
   res.json({ savedVehicles: foundUser.savedVehicles, action });
 });
 
+// --- DYNAMIC FRONTEND /api/users ENDPOINTS (Direct User Return mappings) ---
+app.post('/api/users/login', (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    res.status(400).json({ error: 'Email is required.' });
+    return;
+  }
+
+  let user = database.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (!user) {
+    // If guest clicks log-in with their email, auto-create a user
+    user = {
+      id: `user-${Date.now()}`,
+      name: email.split('@')[0],
+      email: email,
+      role: email.toLowerCase().includes('admin') ? 'admin' : 'user',
+      savedVehicles: []
+    };
+    database.users.push(user);
+    saveDB(database);
+  }
+  res.json(user);
+});
+
+app.post('/api/users/register', (req, res) => {
+  const { name, email } = req.body;
+  if (!name || !email) {
+    res.status(400).json({ error: 'Name and email are required.' });
+    return;
+  }
+  
+  const existing = database.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  if (existing) {
+    res.status(400).json({ error: 'User with this email already exists.' });
+    return;
+  }
+
+  const isFirstAdmin = email.toLowerCase().includes('admin');
+  const newUser: User = {
+    id: `user-${Date.now()}`,
+    name,
+    email,
+    role: isFirstAdmin ? 'admin' : 'user',
+    savedVehicles: []
+  };
+
+  database.users.push(newUser);
+  saveDB(database);
+
+  res.json(newUser);
+});
+
+app.put('/api/users/:id', (req, res) => {
+  const targetId = req.params.id;
+  const { name, email } = req.body;
+  
+  const found = database.users.find(u => u.id === targetId);
+  if (found) {
+    if (name) found.name = name;
+    if (email) found.email = email;
+    saveDB(database);
+    res.json(found);
+  } else {
+    res.status(404).json({ error: 'User not found in DB.' });
+  }
+});
+
+app.post('/api/users/:id/wishlist', (req, res) => {
+  const targetId = req.params.id;
+  const { savedVehicles } = req.body;
+  if (!savedVehicles || !Array.isArray(savedVehicles)) {
+    res.status(400).json({ error: 'savedVehicles array is required.' });
+    return;
+  }
+
+  const foundUser = database.users.find(u => u.id === targetId);
+  if (!foundUser) {
+    res.status(404).json({ error: 'User record missing.' });
+    return;
+  }
+
+  foundUser.savedVehicles = savedVehicles;
+  saveDB(database);
+  res.json(foundUser);
+});
+
 // --- ADMIN CONTROL & SPECIAL LOGIN ---
 app.post('/api/admin/login', (req, res) => {
   const { username, password } = req.body;
